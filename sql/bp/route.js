@@ -4,6 +4,7 @@ import { connectDb } from "@/util/connect";
 import UserBook from "@/models/sql/user-book";
 import BpaModel from "@/models/sql/bpa-model";
 import { NextResponse, NextRequest } from "next/server";
+import { Arapey } from "next/font/google";
 // import commonData from "@/pages/api/common-data.json";
 
 
@@ -75,63 +76,134 @@ const current_claim_doc = (cd) => {
 }
 const InsertServiceData = (serviceDoc) => {
 
+    const service_complete_data = {
+        Cash: {
+            "type_0": false,
+            "bst-1": { "bsf-1": false, "bsf-2": false },
+            "type_1": false,
+            "bst-2": { "bsf-1": false, "bsf-2": false },
+            "type_2": false,
+            "bst-3": { "bsf-1": false, "bsf-2": false },
+            "type_3": false,
+            "bst-4": { "bsf-1": false, "bsf-2": false },
+            "bsd-1": false,
+            "bsd_1_text": ``,
+            "bsd-2": false,
+            "bsd_2_text": ``,
+            "bsd-3": false,
+            "bsd_3_text": ``,
+            "bsd-4": false,
+            "bsd_4_text": ``,
+            "bsd-5": false,
+            "bsd_5_text": ``,
+            "bsd-6": false,
+            "bsd_6_text": ``
+        },
+        Cashless: {
+            "type_0": false,
+            "bst-1": { "bsf-1": false, "bsf-2": false },
+            "type_1": false,
+            "bst-2": { "bsf-1": false, "bsf-2": false },
+            "type_2": false,
+            "bst-3": { "bsf-1": false, "bsf-2": false },
+            "type_3": false,
+            "bst-4": { "bsf-1": false, "bsf-2": false },
+            "bsd-1": false,
+            "bsd_1_text": ``,
+            "bsd-2": false,
+            "bsd_2_text": ``,
+            "bsd-3": false,
+            "bsd_3_text": ``,
+            "bsd-4": false,
+            "bsd_4_text": ``,
+            "bsd-5": false,
+            "bsd_5_text": ``,
+            "bsd-6": false,
+            "bsd_6_text": ``
+        }
+    }
     const Cash = serviceDoc.cash ? true : false;
     const Cashless = serviceDoc.Cashless ? true : false;
+    service_complete_data[`Cash`][`type_0`] = serviceDoc.cash_patient_1 ? true : false;
+    service_complete_data[`Cash`][`bst-1`][`bsf-1`] = serviceDoc.cash_patient_opd_1 ? true : false;
+    service_complete_data[`Cash`][`bst-1`][`bsf-1`] = serviceDoc.cash_patient_ipd_1 ? true : false;
+    // const cash_patient_1 = serviceDoc.cash_patient_1 ? true : false;
+    // const cash_patient_opd_1 = serviceDoc.cash_patient_opd_1 ? true : false;
+    // const cash_patient_ipd_1 = serviceDoc.cash_patient_ipd_1 ? true : false;
 
-    const cash_patient_1 = serviceDoc.cash_patient_1 ? true : false;
-    const cash_patient_opd_1 = serviceDoc.cash_patient_opd_1 ? true : false;
-    const cash_patient_ipd_1 = serviceDoc.cash_patient_ipd_1 ? true : false;
+    // const cash_patient_2 = serviceDoc.cash_patient_2 ? true : false;
+    // const cash_patient_opd_2 = serviceDoc.cash_patient_opd_2 ? true : false;
+    // const cash_patient_ipd_2 = serviceDoc.cash_patient_ipd_2 ? true : false;
+    service_complete_data[`Cash`][`type_1`] = serviceDoc.cash_patient_2 ? true : false;
+    service_complete_data[`Cash`][`bst-2`][`bsf-2`] = serviceDoc.cash_patient_opd_2 ? true : false;
+    service_complete_data[`Cash`][`bst-2`][`bsf-2`] = serviceDoc.cash_patient_ipd_2 ? true : false;
+    // const cash_patient_3 = serviceDoc.cash_patient_3 ? true : false;
+    // const cash_patient_opd_3 = serviceDoc.cash_patient_opd_3 ? true : false;
+    // const cash_patient_ipd_3 = serviceDoc.cash_patient_ipd_3 ? true : false;
+    service_complete_data[`Cash`][`type_2`] = serviceDoc.cash_patient_3 ? true : false;
+    service_complete_data[`Cash`][`bst-3`][`bsf-3`] = serviceDoc.cash_patient_opd_3 ? true : false;
+    service_complete_data[`Cash`][`bst-3`][`bsf-3`] = serviceDoc.cash_patient_ipd_3 ? true : false;
 
-    const cash_patient_2 = serviceDoc.cash_patient_2 ? true : false;
-    const cash_patient_opd_2 = serviceDoc.cash_patient_opd_2 ? true : false;
-    const cash_patient_ipd_2 = serviceDoc.cash_patient_ipd_2 ? true : false;
-
-    const cash_patient_3 = serviceDoc.cash_patient_3 ? true : false;
-    const cash_patient_opd_3 = serviceDoc.cash_patient_opd_3 ? true : false;
-    const cash_patient_ipd_3 = serviceDoc.cash_patient_ipd_3 ? true : false;
-
-    const cash_doc_1 = serviceDoc.cash_doc_1 ? true : false;
-    const cash_doc_1_txt = serviceDoc.cash_doc_1_txt ? serviceDoc.cash_doc_1_txt : ``;
-    const cash_doc_2 = serviceDoc.cash_doc_2 ? true : false;
-    const cash_doc_2_txt = serviceDoc.cash_doc_2_txt ? serviceDoc.cash_doc_2_txt : ``;
-    const cash_doc_3 = serviceDoc.cash_doc_3 ? true : false;
-    const cash_doc_3_txt = serviceDoc.cash_doc_3_txt ? serviceDoc.cash_doc_3_txt : ``;
-    const cash_doc_4 = serviceDoc.cash_doc_4 ? true : false;
-    const cash_doc_4_txt = serviceDoc.cash_doc_4_txt ? serviceDoc.cash_doc_4_txt : ``;
-    const cash_doc_5 = serviceDoc.cash_doc_5 ? true : false;
-    const cash_doc_5_txt = serviceDoc.cash_doc_5_txt ? serviceDoc.cash_doc_5_txt : ``;
-    const cash_doc_6 = serviceDoc.cash_doc_6 ? true : false;
-    const cash_doc_6_txt = serviceDoc.cash_doc_6_txt ? serviceDoc.cash_doc_6_txt : ``;
-
-
-
-    const cashless_patient_1 = serviceDoc.cashless_patient_1 ? true : false;
-    const cashless_patient_opd_1 = serviceDoc.cashless_patient_opd_1 ? true : false;
-    const cashless_patient_ipd_1 = serviceDoc.cashless_patient_ipd_1 ? true : false;
-
-    const cashless_patient_2 = serviceDoc.cashless_patient_2 ? true : false;
-    const cashless_patient_opd_2 = serviceDoc.cashless_patient_opd_2 ? true : false;
-    const cashless_patient_ipd_2 = serviceDoc.cashless_patient_ipd_2 ? true : false;
-
-    const cashless_patient_3 = serviceDoc.cashless_patient_3 ? true : false;
-    const cashless_patient_opd_3 = serviceDoc.cashless_patient_opd_3 ? true : false;
-    const cashless_patient_ipd_3 = serviceDoc.cashless_patient_ipd_3 ? true : false;
-
-    const cashless_doc_1 = serviceDoc.cashless_doc_1 ? true : false;
-    const cashless_doc_1_txt = serviceDoc.cashless_doc_1_txt ? serviceDoc.cashless_doc_1_txt : ``;
-    const cashless_doc_2 = serviceDoc.cashless_doc_2 ? true : false;
-    const cashless_doc_2_txt = serviceDoc.cashless_doc_2_txt ? serviceDoc.cashless_doc_1_txt : ``;
-    const cashless_doc_3 = serviceDoc.cashless_doc_3 ? true : false;
-    const cashless_doc_3_txt = serviceDoc.cashless_doc_3_txt ? serviceDoc.cashless_doc_1_txt : ``;
-    const cashless_doc_4 = serviceDoc.cashless_doc_4 ? true : false;
-    const cashless_doc_4_txt = serviceDoc.cashless_doc_4_txt ? serviceDoc.cashless_doc_1_txt : ``;
-    const cashless_doc_5 = serviceDoc.cashless_doc_5 ? true : false;
-    const cashless_doc_5_txt = serviceDoc.cashless_doc_5_txt ? serviceDoc.cashless_doc_1_txt : ``;
-    const cashless_doc_6 = serviceDoc.cashless_doc_6 ? true : false;
-    const cashless_doc_6_txt = serviceDoc.cashless_doc_6_txt ? serviceDoc.cashless_doc_1_txt : ``;
+    service_complete_data[`Cash`][`bsd-1`] = serviceDoc.cash_doc_1 ? true : false;
+    service_complete_data[`Cash`][`bsd_1_text`] = serviceDoc.cash_doc_1_txt ? serviceDoc.cash_doc_1_txt : ``;
+    service_complete_data[`Cash`][`bsd-2`] = serviceDoc.cash_doc_2 ? true : false;
+    service_complete_data[`Cash`][`bsd_2_text`] = serviceDoc.cash_doc_2_txt ? serviceDoc.cash_doc_2_txt : ``;
+    service_complete_data[`Cash`][`bsd-3`] = serviceDoc.cash_doc_3 ? true : false;
+    service_complete_data[`Cash`][`bsd_3_text`] = serviceDoc.cash_doc_3_txt ? serviceDoc.cash_doc_3_txt : ``;
+    service_complete_data[`Cash`][`bsd-4`] = serviceDoc.cash_doc_4 ? true : false;
+    service_complete_data[`Cash`][`bsd_4_text`] = serviceDoc.cash_doc_4_txt ? serviceDoc.cash_doc_4_txt : ``;
+    service_complete_data[`Cash`][`bsd-5`] = serviceDoc.cash_doc_5_txt ? true : false;
+    service_complete_data[`Cash`][`bsd_5_text`] = serviceDoc.cash_doc_5_txt ? serviceDoc.cash_doc_5_txt : ``;
+    service_complete_data[`Cash`][`bsd-6`] = serviceDoc.cash_doc_6 ? true : false;
+    service_complete_data[`Cash`][`bsd_6_text`] = serviceDoc.cash_doc_6_txt ? serviceDoc.cash_doc_6_txt : ``;
 
 
-    return { service: { Cash, Cashless } };
+
+    // const cashless_patient_1 = serviceDoc.cashless_patient_1 ? true : false;
+    // const cashless_patient_opd_1 = serviceDoc.cashless_patient_opd_1 ? true : false;
+    // const cashless_patient_ipd_1 = serviceDoc.cashless_patient_ipd_1 ? true : false;
+    service_complete_data[`Cashless`][`type_0`] = serviceDoc.cashless_patient_1 ? true : false;
+    service_complete_data[`Cashless`][`bst-1`][`bsf-1`] = serviceDoc.cashless_patient_opd_1 ? true : false;
+    service_complete_data[`Cashless`][`bst-1`][`bsf-1`] = serviceDoc.cash_patient_ipd_1 ? true : false;
+    // const cashless_patient_2 = serviceDoc.cashless_patient_2 ? true : false;
+    // const cashless_patient_opd_2 = serviceDoc.cashless_patient_opd_2 ? true : false;
+    // const cashless_patient_ipd_2 = serviceDoc.cashless_patient_ipd_2 ? true : false;
+    service_complete_data[`Cashless`][`type_1`] = serviceDoc.cashless_patient_2 ? true : false;
+    service_complete_data[`Cashless`][`bst-2`][`bsf-2`] = serviceDoc.cashless_patient_opd_2 ? true : false;
+    service_complete_data[`Cashless`][`bst-2`][`bsf-2`] = serviceDoc.cashless_patient_ipd_2 ? true : false;
+    // const cashless_patient_3 = serviceDoc.cashless_patient_3 ? true : false;
+    // const cashless_patient_opd_3 = serviceDoc.cashless_patient_opd_3 ? true : false;
+    // const cashless_patient_ipd_3 = serviceDoc.cashless_patient_ipd_3 ? true : false;
+    service_complete_data[`Cashless`][`type_2`] = serviceDoc.cashless_patient_3 ? true : false;
+    service_complete_data[`Cashless`][`bst-3`][`bsf-3`] = serviceDoc.cashless_patient_opd_3 ? true : false;
+    service_complete_data[`Cashless`][`bst-3`][`bsf-3`] = serviceDoc.cashless_patient_ipd_3 ? true : false;
+
+    // const cashless_doc_1 = serviceDoc.cashless_doc_1 ? true : false;
+    // const cashless_doc_1_txt = serviceDoc.cashless_doc_1_txt ? serviceDoc.cashless_doc_1_txt : ``;
+    // const cashless_doc_2 = serviceDoc.cashless_doc_2 ? true : false;
+    // const cashless_doc_2_txt = serviceDoc.cashless_doc_2_txt ? serviceDoc.cashless_doc_1_txt : ``;
+    // const cashless_doc_3 = serviceDoc.cashless_doc_3 ? true : false;
+    // const cashless_doc_3_txt = serviceDoc.cashless_doc_3_txt ? serviceDoc.cashless_doc_1_txt : ``;
+    // const cashless_doc_4 = serviceDoc.cashless_doc_4 ? true : false;
+    // const cashless_doc_4_txt = serviceDoc.cashless_doc_4_txt ? serviceDoc.cashless_doc_1_txt : ``;
+    // const cashless_doc_5 = serviceDoc.cashless_doc_5 ? true : false;
+    // const cashless_doc_5_txt = serviceDoc.cashless_doc_5_txt ? serviceDoc.cashless_doc_1_txt : ``;
+    // const cashless_doc_6 = serviceDoc.cashless_doc_6 ? true : false;
+    // const cashless_doc_6_txt = serviceDoc.cashless_doc_6_txt ? serviceDoc.cashless_doc_1_txt : ``;
+    service_complete_data[`Cashless`][`bsd-1`] = serviceDoc.cashless_doc_1 ? true : false;
+    service_complete_data[`Cashless`][`bsd_1_text`] = serviceDoc.cashless_doc_1_txt ? serviceDoc.cashless_doc_1_txt : ``;
+    service_complete_data[`Cashless`][`bsd-2`] = serviceDoc.cashless_doc_2 ? true : false;
+    service_complete_data[`Cashless`][`bsd_2_text`] = serviceDoc.cashless_doc_2_txt ? serviceDoc.cashless_doc_2_txt : ``;
+    service_complete_data[`Cashless`][`bsd-3`] = serviceDoc.cashless_doc_3 ? true : false;
+    service_complete_data[`Cashless`][`bsd_3_text`] = serviceDoc.cashless_doc_3_txt ? serviceDoc.cashless_doc_3_txt : ``;
+    service_complete_data[`Cashless`][`bsd-4`] = serviceDoc.cashless_doc_4 ? true : false;
+    service_complete_data[`Cashless`][`bsd_4_text`] = serviceDoc.cashless_doc_4_txt ? serviceDoc.cashless_doc_4_txt : ``;
+    service_complete_data[`Cashless`][`bsd-5`] = serviceDoc.cashless_doc_5_txt ? true : false;
+    service_complete_data[`Cashless`][`bsd_5_text`] = serviceDoc.cashless_doc_5_txt ? serviceDoc.cashless_doc_5_txt : ``;
+    service_complete_data[`Cashless`][`bsd-6`] = serviceDoc.cashless_doc_6 ? true : false;
+    service_complete_data[`Cashless`][`bsd_6_text`] = serviceDoc.cashless_doc_6_txt ? serviceDoc.cashless_doc_6_txt : ``;
+
+    return { service: { Cash, Cashless }, data: service_complete_data };
 }
 const getBpaAllEmails = async () => {
     const maildata = await BpaEmail.findAll({
@@ -176,7 +248,7 @@ const InsertBpa = async (bpa_table, service_table) => {
         // console.log(bpaMails[bpaId])
 
         const serviceData2 = currService?.length ? InsertServiceData(currService[currService?.length - 1]) : ``;
-        console.log(JSON.stringify(serviceData2.service))
+        console.log(serviceData2.data)
         if (sqlids.includes(bpaId)) return false;
         const serviceData = currService?.length ? InsertServiceData(currService[currService?.length - 1]) : ``;
         // Current bpa type

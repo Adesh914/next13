@@ -6,7 +6,7 @@ export const DataService = {
         { "Id": "bs-2", "Name": "Cashless", "Order": 2, "SQL": 16 }
     ],
     "bpa_service_type": [
-        { "Id": "bst-1", "Name": "NotRequired", "Order": 1 },
+        { "Id": "bst-1", "Name": "Not Required", "Order": 1 },
         { "Id": "bst-2", "Name": "Email", "Order": 2 },
         { "Id": "bst-3", "Name": "CRM", "Order": 3 },
         { "Id": "bst-4", "Name": "Courier", "Order": 4 }
@@ -24,37 +24,43 @@ export const DataService = {
         { "Id": "bsd-6", "Name": "Others", "Order": 6 }
     ]
 };
-export const Servicetype = ({ ServiceName, change, sfChange }) => {
+export const Servicetype = ({ ServiceName, change, sfChange, bs }) => {
+    // console.log(`bs service ${ServiceName}:`, bs[ServiceName])
     return (
-        <div key="st" style={{ paddingLeft: `7%` }}>
+        <div key="st" style={{ paddingLeft: `7% ` }}>
             {DataService.bpa_service_type.map((sr, i) => {
                 return (<div key={i} >
                     <input type="checkbox"
                         className={ServiceName}
-                        onChange={(e) => change(`${ServiceName}_${i}`, e.target.checked)}
+                        checked={bs[ServiceName][`type_${i}`]}
+                        onChange={(e) => change(e)} //`${ ServiceName }_${ i }`, e.target.checked
                         id={`${ServiceName}_${i}`}
                         name={`type_${i}`}
                         value={sr.Id} key={i}
                     />{sr.Name}
-                    <ServiceFacility service_facility={`${ServiceName}_${i}`} sfc={`${ServiceName}_${i}`} whenChange={sfChange} />
+                    <ServiceFacility service_facility={`${ServiceName}_${i}`} whenChange={sfChange} bs={bs[ServiceName][sr.Id]} serviceId={i} />
 
                 </div>)
             })}
         </div>
     );
 }
-export const ServiceFacility = ({ service_facility, whenChange, sfc }) => {
+export const ServiceFacility = ({ service_facility, whenChange, bs, serviceId }) => {
+
     return (
-        <div key="st" style={{ paddingLeft: `7%` }}>
+        <div key="st" style={{ paddingLeft: `7% ` }}>
             {DataService.bpa_service_facility.map((sf, i) => {
                 return (<div key={i} >
+
                     <input
                         type="checkbox"
                         value={sf.Id}
-                        id={`${service_facility}-${sf.Name}`}
+                        checked={bs[sf.Id]}
+                        id={`${service_facility} - ${sf.Name}`}
                         className={service_facility}
+                        name={serviceId}
                         key={i}
-                        onChange={(e) => whenChange(`${service_facility}-${sf.Name}`, e.target.checked)}
+                        onChange={(e) => whenChange(e)}
                     />{sf.Name}
                     <hr />
                 </div>)
@@ -63,93 +69,168 @@ export const ServiceFacility = ({ service_facility, whenChange, sfc }) => {
     );
 }
 export default function MyService() {
-    const [recentRootChecked, setRecentRootChecked] = useState(``)
+
     const [root, setRoot] = useState({ Cash: false, Cashless: false });
+    const [bs, setBs] = useState({
+        Cash: {
+            "type_0": false,
+            "bst-1": { "bsf-1": false, "bsf-2": false },
+            "type_1": false,
+            "bst-2": { "bsf-1": false, "bsf-2": false },
+            "type_2": false,
+            "bst-3": { "bsf-1": false, "bsf-2": false },
+            "type_3": false,
+            "bst-4": { "bsf-1": false, "bsf-2": false },
+        },
+        Cashless: {
+            "type_0": false,
+            "bst-1": { "bsf-1": false, "bsf-2": false },
+            "type_1": false,
+            "bst-2": { "bsf-1": false, "bsf-2": false },
+            "type_2": false,
+            "bst-3": { "bsf-1": false, "bsf-2": false },
+            "type_3": false,
+            "bst-4": { "bsf-1": false, "bsf-2": false },
+        }
+    });
+    const [serviceCount, setServiceCount] = useState(0);
     const checkedFacility = (id, facilityCheckBox) => {
         let cf = document.querySelectorAll(`.${id}`);
         cf.forEach((facilityDoc) => {
             facilityDoc.checked = facilityCheckBox;
         })
     }
-    const checkedService = (cls, rootchecked) => {
-        cls.forEach((serviceDoc, index) => {
-            serviceDoc.checked = rootchecked
-            //check facility
-            checkedFacility(serviceDoc.getAttribute('id'), rootchecked);
+    const checkedAllService = (cls, rootchecked) => {
+
+        setBs(prevBs => {
+            return {
+                ...prevBs,
+                [cls]: {
+                    ...prevBs[cls],
+                    ["type_0"]: rootchecked,
+                    "bst-1": { "bsf-1": rootchecked, "bsf-2": rootchecked },
+                    ["type_1"]: rootchecked,
+                    "bst-2": { "bsf-1": rootchecked, "bsf-2": rootchecked },
+                    ["type_2"]: rootchecked,
+                    "bst-3": { "bsf-1": rootchecked, "bsf-2": rootchecked },
+                    ["type_3"]: rootchecked,
+                    "bst-4": { "bsf-1": rootchecked, "bsf-2": rootchecked },
+                },
+            }
         });
-    }
-    useEffect(() => {
-        if (recentRootChecked === `Cash`) {
-            const boxService = document.querySelectorAll(".Cash");
-            checkedService(boxService, root.Cash);
-        }
-        if (recentRootChecked === `Cashless`) {
-            const boxService = document.querySelectorAll(".Cashless");
-            checkedService(boxService, root.Cashless);
-        }
-    }, [root])
-    const changeService = (id, checked) => {
-        // const { id, checked } = e.target;
-        checkedFacility(id, checked);
-        const rootBox = id.split('_');
-        let totalChecked = document.querySelectorAll(`.${rootBox[0]}:checked`);
-        if (totalChecked.length === 1) {
-            setRoot((prevRoot) => {
-                return {
-                    ...prevRoot,
-                    [rootBox[0]]: true
-                }
-            })
-        }
-        if (totalChecked.length === 0) {
-            setRoot((prevRoot) => {
-                return {
-                    ...prevRoot,
-                    [rootBox[0]]: false
-                }
-            })
-        }
-        // console.log("totalChecked:", totalChecked.length, rootBox[0]);
 
     }
-    const changeFacility = (id, checked) => {
-        // const { id, checked } = e.target;
-        const servBox = id.split('-');
-        console.log("totalChecked:", servBox[0], checked);
+
+    const changeService = (e) => {
+
+        const { id, name, value, checked } = e.target;
+        const rootBox = id.split('_');
+
+        let totalChecked = document.querySelectorAll(`.${rootBox[0]}:checked`);
+        console.log("totalChecked", rootBox[0], bs, totalChecked.length)
+        if (parseInt(totalChecked.length) === 0) {
+            setRoot(oldservice => {
+                return {
+                    ...oldservice,
+                    [rootBox[0]]: checked
+                }
+            })
+        }
+
+        if (parseInt(totalChecked.length) === 1 && root[rootBox[0]] === false) {
+            setRoot(oldservice => {
+                return {
+                    ...oldservice,
+                    [rootBox[0]]: checked
+                }
+            })
+        }
+        setBs(prevBs => {
+            return {
+                ...prevBs,
+                [rootBox[0]]: {
+                    ...prevBs[rootBox[0]],
+                    [name]: checked,
+                    [value]: { "bsf-1": checked, "bsf-2": checked }
+                },
+            }
+        });
+
+
+    }
+    const changeFacility = (e) => {
+        const { id, name, value, checked } = e.target;
+        const facBox = id.split('-');
+        const servName = facBox[0].split('_');
+        console.log("totalChecked:", facBox[0], servName[0], checked);
+
+
+        setBs(prevBs => {
+            return {
+                ...prevBs,
+                [servName[0]]: {
+                    ...prevBs[servName[0]],
+                    // [`type_${name}`]: checked,
+                    [`bst-${parseInt(name) + 1}`]: {
+                        ...prevBs[servName[0]][[`bst-${parseInt(name) + 1}`]],
+                        [value]: checked
+                    }
+                },
+            }
+        });
+        // get checked service
+        let totalChecked = document.querySelectorAll(`.${facBox[0]}:checked`);
+
+
+        // checked root service after clicking opd/ipd
+        if (parseInt(totalChecked.length) === 0 && root[servName[0]] === false) {
+            setRoot(oldservice => {
+                return {
+                    ...oldservice,
+                    [servName[0]]: checked
+                }
+            });
+            setBs(prevBs => {
+                return {
+                    ...prevBs,
+                    [servName[0]]: {
+                        ...prevBs[servName[0]],
+                        [`type_${name}`]: checked
+                    },
+                }
+            });
+        }
     }
     const changeRoot = (e) => {
-        // console.log("e.target:", e.target.checked)
         const { name, checked } = e.target;
-
-        // console.log(`name = ${ name } & ${ checked }, ${ root }`)
-        setRecentRootChecked(name);
         setRoot((prevRoot) => {
             return {
                 ...prevRoot,
                 [name]: checked
             }
         })
-        // console.log(root)
+        checkedAllService(name, checked);
     }
-    console.log(root)
+
     return (
 
-        <div style={{ width: `100% `, paddingLeft: `5% ` }} key="root">
-
+        <div style={{ width: `100 % `, paddingLeft: `5% ` }} key="root">
+            {/* {console.log("bs:", bs)} */}
 
             {DataService.bpa_service.map((serv, index) => {
                 return (
                     <div style={{ width: "40%" }} key={index}>
                         <input
                             type="checkbox"
-                            id={serv.Name} //serv.Name == `Cash` ? root.Cash : root.Cashless
+                            id={serv.Name}
                             checked={serv.Name == `Cash` ? root.Cash : root.Cashless}
-                            value={1}
+                            value={serv.Id
+                            }
                             name={serv.Name}
                             key={serv.Name}
                             onChange={changeRoot}
                         />{serv.Name}
-                        <Servicetype ServiceName={serv.Name} change={changeService} sfChange={changeFacility} />
+                        <Servicetype ServiceName={serv.Name} change={changeService} sfChange={changeFacility} bs={bs} />
                     </div>
                 )
             })}
