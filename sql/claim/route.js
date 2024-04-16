@@ -1,34 +1,160 @@
 import { Admission, AdmissionPreauth, AdmissionStatus } from "@/models/sql/PreauthModel";
+import { Doctor } from "@/models/sql/HospitalModel";
 import { NextResponse, NextRequest } from "next/server";
 import { where } from "sequelize";
-// Admission.hasOne(AdmissionPreauth);
-// AdmissionPreauth.belongsTo(Admission, { foreignKey: "patient_id" });
+import { connectDb } from "@/util/connect";
+import UserBook from "@/models/sql/user-book";
+import BpaModel from "@/models/sql/bpa-model";
+import ClaimModel from "@/models/sql/claim-model";
+
 Admission.hasOne(AdmissionPreauth, { foreignKey: "ap_patient" });
 AdmissionPreauth.belongsTo(Admission, { foreignKey: "preauth_id" });
 export async function GET(req, res) {
     const name = req.nextUrl.searchParams.get('name');
-    const preauthData = await Admission.findAll({ raw: true, include: [AdmissionPreauth], offset: 0, limit: 2 });
+    await connectDb();
+    if (name == `list`) {
+        // const userObj = await UserBook.find({}, { _id: true, Doctors: true, SqlId: true });
+        // const UserData = userObj.reduce((cb, user) => {
+        //     // const { _id, SqlId } = user; //console.log("newuser:", newuser)
+        //     (cb[user.SqlId] = cb[user.SqlId] || []).push(user);
+        //     return cb;
+        // }, {});
+        const bpaObj = await BpaModel.find({}, { _id: true, SqlId: true });
+        const BpaData = bpaObj.reduce((cb, user) => {
+            const { _id, SqlId } = user;
+            (cb[user.SqlId] = cb[user.SqlId] || []).push(_id.toString());
+            return cb;
+        }, {});
 
-    const admission_ids = preauthData.map(({ patient_id }) => patient_id)
-    console.log(admission_ids)
+        // console.log("userData", UserData, BpaData)
+        const preauthData = await Admission.findAll({ raw: true, include: [AdmissionPreauth], offset: 0, limit: 50 });
 
-    InsertClaim(preauthData, admission_ids);
-    return NextResponse.json({ message: "success", data: preauthData })
-}
-
-const InsertClaim = async (admission, fk_status_array) => {
-    const ad_status = await getAdmissionStatus(fk_status_array);
-
-    admission.forEach(row => {
-        // const ad_status = getAdmissionStatus(row.patient_id);
-        // console.log(ad_status)
-    });
-    const currentData = {
-
+        const admission_ids = preauthData.map(({ patient_id }) => patient_id)
+        console.log(admission_ids)
+        // const UserData = await getUserDetail();
+        const { admission, ad_status } = await InsertClaim(preauthData, admission_ids, BpaData);
+        return NextResponse.json({ message: "success", data: ad_status })
+    } else if (name === 'delete') {
+        try {
+            await ClaimModel.deleteMany({});
+            console.log('All Data successfully deleted');
+            return NextResponse.json({ "message": "all empanel ment data deleted." })
+        } catch (err) {
+            console.log(err);
+        }
     }
 }
 
-const getAdmissionStatus = async((patientId) => {
+const InsertClaim = async (admission, fk_status_array, bpa) => {
+    let ad_status = await getAdmissionStatus(fk_status_array);
+    const doctorData = await getUserDetail();
+    const sqlDoctor = await getDoctor();
+    const sqlids = await IsClaimExist();
+    let failed_row = 0;
+    admission.forEach(row => {
+        let sql_id = row.patient_id;
+
+
+        // if (sqlids.includes(sql_id)) return false;
+        let [user] = doctorData[row.hospital];
+        if (!bpa[row.bpa] || !user.id) {
+            failed_row++;
+            return false;
+        }
+
+
+        let [bpa_id] = bpa[row.bpa];
+        let hospital_doctors = sqlDoctor?.[row.hospital] ? sqlDoctor?.[row.hospital] : ``;
+
+        console.log("user_id dfdf", hospital_doctors.length, hospital_doctors, user.Doctors.length)
+        let mongoDoctor = ``;
+        if (hospital_doctors.length > 1) {
+            hospital_doctors.forEach((doct, i) => {
+                if ((doct.id != row.doctor) || user.Doctors.length == 0) return false;
+                user.Doctors.forEach((ud, index) => {
+                    if (doct.doctor_name != ud.Name) return false;
+                    mongoDoctor = ud['_id'].toString();
+                });
+
+            })
+        } else if (hospital_doctors.length == 1) {
+            if (hospital_doctors[0]?.doctor_name == user.Doctors[0]['Name']) {
+                mongoDoctor = user.Doctors[0]['_id'].toString();
+            }
+        }
+
+        const currentData = {
+            PatientName: row.patient_name,
+            SqlId: row.patient_id,
+            Type: row.patient_tp,
+            Hospital: user.id,
+            Bpa: bpa_id,
+            Payer: bpa_id,
+            Mrd: row.mrd_no,
+            Doa: row.doa,
+            Dod: row.dod,
+            MobileNo: row.rel_mobile,
+            Policy: row.policy_no,
+            Uhid: row.uhid,
+            CorporateName: row.corp_name,
+            EmpId: row.emp_id,
+            TreatmentDesc: row.investgation_detail,
+
+
+            DocAttached: ``,
+            RoomFee: row["admission_preauth.end_room_fee"],
+            InvestigationFee: row["admission_preauth.end_investigation_fee"],
+            IcuFee: row["admission_preauth.end_icu_fee"],
+            OtFee: row["admission_preauth.end_ot_fee"],
+            ConsultationFee: row["admission_preauth.end_consultation_fee"],
+            MedicineFee: row["admission_preauth.end_medicine_fee"],
+            OtherFee: row['admission_preauth.end_other_fee'],
+            BillAmt: row.total_fee,
+            FileNo: row['admission_preauth.file_no'],
+            ClaimNo: row['admission_preauth.claim_no'],
+            Esm: ``,
+            Relation: row.relation, //need to datamaping with common data
+            StayDays: row.stayed_days,
+
+            AlNo: row[`admission_preauth.al_no`],
+            AlAmt: row["admission_preauth.al_amt"],
+            DiffWithAl: row["admission_preauth.bill_diff_al"],
+            BillNo: row["admission_preauth.bill_amt"],
+            IpdNo: row["admission_preauth.ipd_no"],
+            CoPay: row["admission_preauth.co_pay"],
+            Discount: row["admission_preauth.discount"],
+            NpAmt: row["admission_preauth.np_amt"],
+            Deduction: row["admission_preauth.deduction"],
+            IodNo: ``,
+            Doctor: mongoDoctor
+        }
+        const claimQ = new ClaimModel(currentData);
+        claimQ.save();
+        console.log("Claim Failed row:", failed_row);
+    });
+    return { admission, ad_status };
+}
+const getDoctor = async () => {
+    const doctors = await Doctor.findAll({ raw: true });
+
+    return doctors.reduce((cb, doctor) => {
+        (cb[doctor.hos_id] = cb[doctor.hos_id] || []).push(doctor);
+        return cb;
+    }, {});
+
+}
+const getUserDetail = async () => {
+    const userObj = await UserBook.find({}, { _id: true, Doctors: true, SqlId: true });
+    const UserData = userObj.reduce((cb, user) => {
+        const { _id, Doctors, SqlId } = user; //console.log("newuser:", newuser)
+
+
+        (cb[user.SqlId] = cb[user.SqlId] || []).push({ id: _id.toString(), Doctors });
+        return cb;
+    }, {});
+    return UserData;
+}
+const getAdmissionStatus = async (patientId) => {
     const preauth_status = await AdmissionStatus.findAll({
         raw: true,
         where: {
@@ -43,5 +169,13 @@ const getAdmissionStatus = async((patientId) => {
         return cb;
     }, {})
     return admission_status;
-})
+}
+
+const IsClaimExist = async () => {
+    const mongodbBpa = await ClaimModel.find({}, { "SqlId": 1, "_id": false });
+    return mongodbBpa.reduce((object, doc) => {
+        object.push(doc.SqlId);
+        return object
+    }, [])
+}
 
