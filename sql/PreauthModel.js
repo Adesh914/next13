@@ -90,3 +90,22 @@ export const AdmissionStatus = db.define("admission_status", {
     freezeTableName: true,
     timestamps: false
 });
+
+export const ClaimMst = db.define('claim_mst', {
+    claim_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    claim_patient: { type: DataTypes.INTEGER },
+    claim_recieved: { type: DataTypes.ENUM('0', '1') },
+    // last_status: { type: DataTypes.INTEGER },
+    recieve_date: { type: DataTypes.DATEONLY },
+    recieve_remark: { type: DataTypes.STRING },
+    parent_id: { type: DataTypes.INTEGER },
+    paid_date: { type: DataTypes.DATEONLY },
+    claim_created: { type: DataTypes.DATE }
+}, {
+    freezeTableName: true,
+    timestamps: false
+});
