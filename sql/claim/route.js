@@ -1,4 +1,4 @@
-import { Admission, AdmissionPreauth, AdmissionStatus, ClaimMst } from "@/models/sql/PreauthModel";
+import { Admission, AdmissionPreauth, AdmissionStatus, ClaimMst, ClaimStatus } from "@/models/sql/PreauthModel";
 import { Doctor } from "@/models/sql/HospitalModel";
 import { NextResponse, NextRequest } from "next/server";
 import { where } from "sequelize";
@@ -32,8 +32,8 @@ export async function GET(req, res) {
         const admission_ids = preauthData.map(({ patient_id }) => patient_id)
         console.log(admission_ids)
         // const UserData = await getUserDetail();
-        const { admission, ad_status } = await InsertClaim(preauthData, admission_ids, BpaData);
-        return NextResponse.json({ message: "success", data: admission })
+        const { admission, claimsLists } = await InsertClaim(preauthData, admission_ids, BpaData);
+        return NextResponse.json({ message: "success", data: claimsLists })
     } else if (name === 'delete') {
         try {
             await ClaimModel.deleteMany({});
@@ -47,9 +47,13 @@ export async function GET(req, res) {
 
 const InsertClaim = async (admission, fk_status_array, bpa) => {
     let ad_status = await getAdmissionStatus(fk_status_array);
-    let claimsLists = await getClaimList(fk_status_array); console.log(claimsLists)
+    const { claimsLists, claimIds } = await getClaimList(fk_status_array);
     const doctorData = await getUserDetail();
     const sqlDoctor = await getDoctor();
+
+    // claim status
+    const my_claim_status = await getClaimStatus(claimIds);
+    // console.log("my_claim_status", my_claim_status)
     const sqlids = await IsClaimExist();
     let failed_row = 0;
     admission.forEach(row => {
@@ -103,13 +107,31 @@ const InsertClaim = async (admission, fk_status_array, bpa) => {
         // console.log("case_status:", case_status.length ? case_status[case_status.length - 1]?.['Status'] : `Not available`)
 
         //  claim Data start
-
+        const claim_final_data = {
+            IsRecieved: false,
+            RecievedRemark: ``,
+            RecievedDate: ``,
+            PaidDate: ``
+        };
         const claim_data = claimsLists?.[sql_id];
-        if (claim_data.length > 1) {
+        let claim_status_final_doc = [];
+        if (claim_data?.length) {
+            claim_final_data[`IsRecieved`] = claim_data[0][`claim_recieved`] ? true : false;
+            claim_final_data[`RecievedDate`] = claim_data[0][`recieve_date`];
+            claim_final_data[`RecievedRemark`] = claim_data[0][`recieve_remark`];
+            claim_final_data[`PaidDate`] = claim_data[0][`paid_date`] != '0000-00-00' ? claim_data[0][`paid_date`] : ``;
 
-        } else if (claim_data.length == 1) {
-
+            const statusData = my_claim_status[claim_data[0][`claim_id`]];
+            claim_status_final_doc = statusData.map((statusRow, index) => (
+                {
+                    "Status": statusRow.cl_status,
+                    "StatusDesc": statusRow.cl_remarks,
+                    "StatusDoc": statusRow.cl_attachment,
+                    "StatusDate": statusRow.cl_created
+                }));
+            // console.log(claim_data[0][`claim_id`], statusData)
         }
+        // [117, 91, 92, 86, 64, 79, 101, 73, 66, 119, 96, 78, 102, 105, 118, 80, 67]
         const currentData = {
             PatientName: row.patient_name,
             SqlId: sql_id,
@@ -155,13 +177,15 @@ const InsertClaim = async (admission, fk_status_array, bpa) => {
 
             CaseStatus: case_status,
             LastStatus: last_status,
+            IsGovtClaim: [117, 91, 92, 86, 64, 79, 101, 73, 66, 119, 96, 78, 102, 105, 118, 80, 67].includes(row.bpa) ? true : false,
 
             Claim: {
-                IsRecieved: ``,
-                RecievedRemark: ``,
-                RecievedDate: ``,
-                PaidDate: ``
+                IsRecieved: claim_final_data.IsRecieved,
+                RecievedRemark: claim_final_data.RecievedRemark,
+                RecievedDate: claim_final_data.RecievedDate,
+                PaidDate: claim_final_data.PaidDate
             },
+            ClaimStatus: claim_status_final_doc
         }
         const claimQ = new ClaimModel(currentData);
         claimQ.save();
@@ -181,7 +205,7 @@ const getDoctor = async () => {
 const getUserDetail = async () => {
     const userObj = await UserBook.find({}, { _id: true, Doctors: true, SqlId: true });
     const UserData = userObj.reduce((cb, user) => {
-        const { _id, Doctors, SqlId } = user; //console.log("newuser:", newuser)
+        const { _id, Doctors, SqlId } = user;
 
 
         (cb[user.SqlId] = cb[user.SqlId] || []).push({ id: _id.toString(), Doctors });
@@ -205,18 +229,30 @@ const getAdmissionStatus = async (patientId) => {
     }, {})
     return admission_status;
 }
-const getClaimList = async (preauth_ids) => {
-    const claimDb = await ClaimMst.findAll({ raw: true, where: { claim_patient: preauth_ids }, order: ['claim_id'] });
-    return claimDb.reduce((cb, claimRow) => {
-        (cb[claimRow.claim_patient] = cb[claimRow.claim_patient] || []).push(claimRow);
-        return cb;
-    }, {});
-}
+
 const IsClaimExist = async () => {
     const mongodbBpa = await ClaimModel.find({}, { "SqlId": 1, "_id": false });
     return mongodbBpa.reduce((object, doc) => {
         object.push(doc.SqlId);
         return object
     }, [])
+}
+//  claim data  started
+const getClaimList = async (preauth_ids) => {
+    const claimDb = await ClaimMst.findAll({ raw: true, where: { claim_patient: preauth_ids }, order: ['claim_id'] });
+    const claimsLists = claimDb.reduce((cb, claimRow) => {
+        (cb[claimRow.claim_patient] = cb[claimRow.claim_patient] || []).push(claimRow);
+        return cb;
+    }, {});
+    const claimIds = claimDb.map(({ claim_id }) => claim_id);
+    return { claimsLists, claimIds }
+}
+const getClaimStatus = async (claim_ids) => {
+    const status = await ClaimStatus.findAll({ raw: true, where: { cl_claim: claim_ids } });
+    const claim_status_list = status.reduce((cb, claimRow) => {
+        (cb[claimRow.cl_claim] = cb[claimRow.cl_claim] || []).push(claimRow);
+        return cb;
+    }, {});
+    return claim_status_list
 }
 

@@ -100,11 +100,57 @@ export const ClaimMst = db.define('claim_mst', {
     claim_patient: { type: DataTypes.INTEGER },
     claim_recieved: { type: DataTypes.ENUM('0', '1') },
     // last_status: { type: DataTypes.INTEGER },
-    recieve_date: { type: DataTypes.DATEONLY },
+    recieve_date: { type: DataTypes.DATE },
     recieve_remark: { type: DataTypes.STRING },
     parent_id: { type: DataTypes.INTEGER },
     paid_date: { type: DataTypes.DATEONLY },
     claim_created: { type: DataTypes.DATE }
+}, {
+    freezeTableName: true,
+    timestamps: false
+});
+
+export const ClaimStatus = db.define('claim_status', {
+    cl_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    cl_claim: { type: DataTypes.INTEGER },
+    cl_status: { type: DataTypes.INTEGER },
+    cl_remarks: { type: DataTypes.STRING },
+    cl_nmi: { type: DataTypes.INTEGER },
+    cl_attachment: { type: DataTypes.STRING },
+    cl_created: { type: DataTypes.DATEONLY },
+}, {
+    freezeTableName: true,
+    timestamps: false
+});
+
+
+
+export const ClaimStatusPayment = db.define('claim_payment', {
+    cp_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    cp_claim: { type: DataTypes.INTEGER },
+    cp_status: { type: DataTypes.INTEGER },
+    cp_pod_no: { type: DataTypes.STRING },
+    cp_pod_date: { type: DataTypes.DATE },
+    cp_utr_no: { type: DataTypes.STRING },
+    cp_utr_date: { type: DataTypes.DATE },
+    cp_utr_amt: { type: DataTypes.DECIMAL(11, 2) },
+    cp_point: { type: DataTypes.DECIMAL(11, 2) },
+    cp_tds: { type: DataTypes.DECIMAL(11, 2) },
+    cp_np: { type: DataTypes.DECIMAL(11, 2) },
+    cp_co_pay: { type: DataTypes.DECIMAL(11, 2) },
+    cp_deduction: { type: DataTypes.DECIMAL(11, 2) },
+    cp_discount: { type: DataTypes.DECIMAL(11, 2) },
+    cp_os: { type: DataTypes.DECIMAL(11, 2) },
+    cp_approve_diff: { type: DataTypes.DECIMAL(11, 2) },
+    cp_pay_created: { type: DataTypes.DATE },
 }, {
     freezeTableName: true,
     timestamps: false
