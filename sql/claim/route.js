@@ -1,4 +1,4 @@
-import { Admission, AdmissionPreauth, AdmissionStatus, ClaimMst, ClaimStatus } from "@/models/sql/PreauthModel";
+import { Admission, AdmissionPreauth, AdmissionStatus, ClaimMst, ClaimStatus, ClaimStatusPayment } from "@/models/sql/PreauthModel";
 import { Doctor } from "@/models/sql/HospitalModel";
 import { NextResponse, NextRequest } from "next/server";
 import { where } from "sequelize";
@@ -6,12 +6,14 @@ import { connectDb } from "@/util/connect";
 import UserBook from "@/models/sql/user-book";
 import BpaModel from "@/models/sql/bpa-model";
 import ClaimModel from "@/models/sql/claim-model";
+import commonData from "../../sql/common-data.json"
 
 Admission.hasOne(AdmissionPreauth, { foreignKey: "ap_patient" });
 AdmissionPreauth.belongsTo(Admission, { foreignKey: "preauth_id" });
 export async function GET(req, res) {
     const name = req.nextUrl.searchParams.get('name');
     await connectDb();
+
     if (name == `list`) {
         // const userObj = await UserBook.find({}, { _id: true, Doctors: true, SqlId: true });
         // const UserData = userObj.reduce((cb, user) => {
@@ -19,6 +21,7 @@ export async function GET(req, res) {
         //     (cb[user.SqlId] = cb[user.SqlId] || []).push(user);
         //     return cb;
         // }, {});
+
         const bpaObj = await BpaModel.find({}, { _id: true, SqlId: true });
         const BpaData = bpaObj.reduce((cb, user) => {
             const { _id, SqlId } = user;
@@ -27,7 +30,7 @@ export async function GET(req, res) {
         }, {});
 
         // console.log("userData", UserData, BpaData)
-        const preauthData = await Admission.findAll({ raw: true, include: [AdmissionPreauth], offset: 0, limit: 20 });
+        const preauthData = await Admission.findAll({ raw: true, include: [AdmissionPreauth], offset: 0, limit: 1000 });
 
         const admission_ids = preauthData.map(({ patient_id }) => patient_id)
         console.log(admission_ids)
@@ -46,14 +49,18 @@ export async function GET(req, res) {
 }
 
 const InsertClaim = async (admission, fk_status_array, bpa) => {
+    const StatusDataCom = [...commonData[`preauth_status`], ...commonData[`claim_status`]];
+    const relData = commonData[`relation`];
+
     let ad_status = await getAdmissionStatus(fk_status_array);
     const { claimsLists, claimIds } = await getClaimList(fk_status_array);
     const doctorData = await getUserDetail();
     const sqlDoctor = await getDoctor();
 
     // claim status
-    const my_claim_status = await getClaimStatus(claimIds);
-    // console.log("my_claim_status", my_claim_status)
+    const { my_claim_status, StatusIds } = await getClaimStatus(claimIds);
+    const payment = await getPayment(StatusIds);
+    // console.log("my_claim_status", payment)
     const sqlids = await IsClaimExist();
     let failed_row = 0;
     admission.forEach(row => {
@@ -92,18 +99,25 @@ const InsertClaim = async (admission, fk_status_array, bpa) => {
         // case status data
         let case_status = [];
         if (ad_status[sql_id]) {
-            case_status = ad_status[sql_id].map(({ last_status, status_bill_amt, status_remarks, status_attachment, status_created }) => (
-                {
-                    "Status": last_status,
+            case_status = ad_status[sql_id].map(({ last_status, status_bill_amt, status_remarks, status_attachment, status_created }) => {
+                let mypreauth_status = ``;
+                StatusDataCom.forEach((mongostatus) => {
+                    if (mongostatus.SQL !== last_status) return false;
+                    mypreauth_status = mongostatus.Id
+                })
+
+                return {
+                    "Status": mypreauth_status,
                     "StatusBillAmt": status_bill_amt,
                     "StatusDesc": status_remarks,
                     "StatusDoc": status_attachment,
                     "StatusDate": status_created
-                })
+                }
+            }
             );
         }
 
-        const last_status = case_status.length ? case_status[case_status.length - 1]['Status'] : ``;
+        let last_status = case_status.length ? case_status[case_status.length - 1]['Status'] : ``;
         // console.log("case_status:", case_status.length ? case_status[case_status.length - 1]?.['Status'] : `Not available`)
 
         //  claim Data start
@@ -122,15 +136,61 @@ const InsertClaim = async (admission, fk_status_array, bpa) => {
             claim_final_data[`PaidDate`] = claim_data[0][`paid_date`] != '0000-00-00' ? claim_data[0][`paid_date`] : ``;
 
             const statusData = my_claim_status[claim_data[0][`claim_id`]];
-            claim_status_final_doc = statusData.map((statusRow, index) => (
-                {
-                    "Status": statusRow.cl_status,
+            // last Claim Status
+            // last_status = statusData[statusData.length - 1]['cl_status'];
+            // let mypreauth_status = ``;
+            StatusDataCom.forEach((lastMongostatus) => {
+                if (lastMongostatus.SQL !== statusData[statusData.length - 1]['cl_status']) return false;
+                last_status = lastMongostatus.Id
+            })
+
+            claim_status_final_doc = statusData.map((statusRow, index) => {
+
+                const payment_data = payment[statusRow?.cl_id];
+
+                const pay = payment_data?.map(row => {
+                    console.log("row.cp_pod_date:", `${sql_id}:`, row.cp_pod_date)
+                    return {
+                        PodNo: row.cp_pod_no,
+                        DeliveryDate: ``,
+                        PodDate: (row.cp_pod_date !== `0000-00-00 00:00:00` || row.cp_pod_date != `Invalid Date`) ? row.cp_pod_date : ``,
+                        UtrNo: row.cp_utr_no,
+                        UtrDate: ``,//(row.cp_utr_date !== `0000-00-00 00:00:00` || row.cp_utr_date !== `1970-01-01 00:00:00`) ? row.cp_utr_date : ``,
+                        UtrAmt: row.cp_utr_amt,
+                        Point: row.cp_point,
+                        Tds: row.cp_tds,
+                        Np: row.cp_np,
+                        CoPay: row.cp_co_pay,
+                        Deduction: row.cp_deduction,
+                        Discount: row.cp_discount,
+                        Os: row.cp_os,
+                        ApproveDiff: row.cp_approve_diff,
+                        PayDate: row.cp_pay_created
+                    }
+                });
+
+                let clStatus = ``;
+                StatusDataCom.forEach((caseStatusrow) => {
+                    if (caseStatusrow.SQL !== statusRow.cl_status) return false;
+                    clStatus = caseStatusrow.Id
+                })
+                return {
+                    "Status": clStatus,
                     "StatusDesc": statusRow.cl_remarks,
                     "StatusDoc": statusRow.cl_attachment,
-                    "StatusDate": statusRow.cl_created
-                }));
+                    "StatusDate": statusRow.cl_created,
+                    "Payment": pay
+                }
+            }
+            );
             // console.log(claim_data[0][`claim_id`], statusData)
         }
+        let preauth_relation = ``;
+
+        relData.forEach((caseRel) => {
+            if (caseRel.SQL !== parseInt(row.relation)) return false;
+            preauth_relation = caseRel.Id
+        })
         // [117, 91, 92, 86, 64, 79, 101, 73, 66, 119, 96, 78, 102, 105, 118, 80, 67]
         const currentData = {
             PatientName: row.patient_name,
@@ -160,7 +220,7 @@ const InsertClaim = async (admission, fk_status_array, bpa) => {
             FileNo: row['admission_preauth.file_no'],
             ClaimNo: row['admission_preauth.claim_no'],
             Esm: ``,
-            Relation: row.relation, //need to datamaping with common data
+            Relation: preauth_relation, //need to datamaping with common data
             StayDays: row.stayed_days,
 
             AlNo: row[`admission_preauth.al_no`],
@@ -249,10 +309,20 @@ const getClaimList = async (preauth_ids) => {
 }
 const getClaimStatus = async (claim_ids) => {
     const status = await ClaimStatus.findAll({ raw: true, where: { cl_claim: claim_ids } });
-    const claim_status_list = status.reduce((cb, claimRow) => {
+    const my_claim_status = status.reduce((cb, claimRow) => {
         (cb[claimRow.cl_claim] = cb[claimRow.cl_claim] || []).push(claimRow);
         return cb;
     }, {});
-    return claim_status_list
+    const StatusIds = status.map(({ cl_id }) => cl_id);
+    return { my_claim_status, StatusIds }
+}
+const getPayment = async (status_ids) => {
+    const pay = await ClaimStatusPayment.findAll({ raw: true, where: { cp_claim: status_ids } });
+
+    const status_payment = pay.reduce((cb, claimRow) => {
+        (cb[claimRow.cp_claim] = cb[claimRow.cp_claim] || []).push(claimRow);
+        return cb;
+    }, {});
+    return status_payment
 }
 

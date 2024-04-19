@@ -1,0 +1,120 @@
+{
+    "preauth_status":[
+        {"Id":"ps-1","Name":"Draft","Order":1, "SQL":118},
+        {"Id":"ps-2","Name":"PA Hold","Order":2, "SQL":133},
+        {"Id":"ps-3","Name":"PA Sent","Order":2, "SQL":70},
+        {"Id":"ps-4","Name":"In-Process","Order":3, "SQL":71},
+        {"Id":"ps-5","Name":"NMI","Order":4, "SQL":72},
+        {"Id":"ps-6","Name":"NMI Sent","Order":5, "SQL":73},
+        {"Id":"ps-7","Name":"Intial Approved","Order":6, "SQL":74},
+        {"Id":"ps-8","Name":"Final Approved","Order":7, "SQL":75},
+        {"Id":"ps-9","Name":"Declined","Order":8, "SQL":76},
+        {"Id":"ps-10","Name":"Reconsideration","Order":9, "SQL":77},
+        {"Id":"ps-11","Name":"Enhancement Sent","Order":10, "SQL":78},
+        {"Id":"ps-12","Name":"Discharge Sent","Order":11, "SQL":79},
+        {"Id":"ps-13","Name":"Correction","Order":12, "SQL":80},
+        {"Id":"ps-14","Name":"Cancel","Order":13, "SQL":82},
+        {"Id":"ps-15","Name":"Dispatched ","Order":14, "SQL":83},
+        {"Id":"ps-16","Name":"Resend","Order":15, "SQL":84},
+        {"Id":"ps-17","Name":"Processed","Order":16, "SQL":85},
+        {"Id":"ps-18","Name":"BNR","Order":17,"SQL":87}
+    ],
+    "preauth_type":[
+        {"Id":"pt-1","Name":"Cashless","Order":1,"SQL":128},
+        {"Id":"pt-2","Name":"Any Cashless","Order":2,"SQL":129}
+    ],
+    "claim_status":[
+        {"Id":"cls-1","Name":"Docs Picked","Order":1, "SQL":86},
+        {"Id":"cls-2","Name":"InTransit","Order":2, "SQL":88},
+        {"Id":"cls-3","Name":"C-NMI","Order":3, "SQL":0},
+        {"Id":"cls-4","Name":"Delivered","Order":4, "SQL":89},
+        {"Id":"cls-5","Name":"In-Process(C)","Order":5, "SQL":90},
+        {"Id":"cls-6","Name":"NMI(C)","Order":6, "SQL":91},
+        {"Id":"cls-7","Name":"Reminder","Order":7, "SQL":92},
+        {"Id":"cls-8","Name":"Declined(C)","Order":8, "SQL":93},
+        {"Id":"cls-9","Name":"Escalate-OS","Order":9, "SQL":94},
+        {"Id":"cls-10","Name":"Settled","Order":10, "SQL":95},
+        {"Id":"cls-11","Name":"Paid","Order":11, "SQL":96},
+        {"Id":"cls-12","Name":"Cancelled","Order":12, "SQL":97},
+        {"Id":"cls-13","Name":"NMI Sent(C)","Order":13, "SQL":98},
+        {"Id":"cls-14","Name":"Repudiated","Order":14, "SQL":99},
+        {"Id":"cls-15","Name":"UTR NA ","Order":15, "SQL":100},
+        {"Id":"cls-16","Name":"Short Payment","Order":16, "SQL":101},
+
+        {"Id":"cls-22","Name":"Approved","Order":2, "SQL":102},
+
+        {"Id":"cls-17","Name":"Escalate-Decline","Order":17, "SQL":103},
+        {"Id":"cls-18","Name":"Escalate–UTRNA","Order":18, "SQL":104},
+        {"Id":"cls-19","Name":"Insufficient","Order":19,"SQL":115},
+        
+        {"Id":"cls-20","Name":"Waiver Awaited","Order":20, "SQL":134},
+        {"Id":"cls-21","Name":"Closure Approved","Order":21,"SQL":135}
+    ],
+    "relation":[
+        {"Id":"rel-1","Name":"Self","Order":1,"SQL":61},
+        {"Id":"rel-2","Name":"Father","Order":2,"SQL":62},
+        {"Id":"rel-3","Name":"Mother","Order":3,"SQL":63},
+        {"Id":"rel-4","Name":"Wife","Order":4,"SQL":64},
+        {"Id":"rel-5","Name":"Son","Order":5,"SQL":65},
+        {"Id":"rel-6","Name":"Daughter","Order":6,"SQL":66},
+        {"Id":"rel-7","Name":"Brother","Order":7,"SQL":67},
+        {"Id":"rel-8","Name":"Sister","Order":8,"SQL":68},
+        {"Id":"rel-9","Name":"Other","Order":9,"SQL":69}       
+    ],
+    "hospital_rooms":[
+        {"Id":"1","Name":"Daycare","Order":1},
+        {"Id":"2","Name":"General Ward","Order":2},
+        {"Id":"3","Name":"Triple Sharing","Order":3},
+        {"Id":"4","Name":"Semi Pvt","Order":4},
+        {"Id":"5","Name":"Pvt","Order":5},
+        {"Id":"6","Name":"Semi-Deluxe","Order":6},
+        {"Id":"7","Name":"Deluxe","Order":7},
+        {"Id":"8","Name":"Semi-Suite","Order":8},
+        {"Id":"9","Name":"Suite","Order":9},
+        {"Id":"10","Name":"Semi-Premium","Order":10},
+        {"Id":"11","Name":"Premium","Order":11}      
+    ],
+    "bpa_type":[
+        {"Id":"bt-1","Name":"TPA","Order":1,"SQL":11},
+        {"Id":"bt-2","Name":"Insurer","Order":2,"SQL":12},
+        {"Id":"bt-3","Name":"Corporate","Order":3,"SQL":13},
+        {"Id":"bt-4","Name":"Govt Panel","Order":4,"SQL":14}        
+    ],
+    "bpa_preauth_type":[
+        {"Id":"bp-1","Name":"NotRequired","Order":1,"SQL":28},
+        {"Id":"bp-2","Name":"Email","Order":2,"SQL":29},
+        {"Id":"bp-3","Name":"CRM","Order":3,"SQL":30}
+    ],
+    "bpa_claim_doc":[
+        {"Id":"bcd-1","Name":"NotRequired","Order":1,"SQL":31},
+        {"Id":"bcd-2","Name":"Email","Order":2,"SQL":32},
+        {"Id":"bcd-3","Name":"CRM","Order":3,"SQL":33},
+        {"Id":"bcd-4","Name":"Courier","Order":4,"SQL":34}         
+    ],
+    "bpa_service":[
+        {"Id":"bs-1","Name":"Cash","Order":1,"SQL":15},
+        {"Id":"bs-2","Name":"Cashless","Order":2,"SQL":16}       
+    ],
+    "bpa_service_type":[
+        {"Id":"bst-1","Name":"NotRequired","Order":1},
+        {"Id":"bst-2","Name":"Email","Order":2},
+        {"Id":"bst-3","Name":"CRM","Order":3},
+        {"Id":"bst-4","Name":"Courier","Order":4}         
+    ],    
+    "bpa_service_facility":[
+        {"Id":"bsf-1","Name":"OPD","Order":1},
+        {"Id":"bsf-2","Name":"IPD","Order":2}       
+    ],
+    "bpa_service_doc":[
+        {"Id":"bsd-1","Name":"AL Required (Through Email)","Order":1},
+        {"Id":"bsd-2","Name":"TPA/Medical Card","Order":2},
+        {"Id":"bsd-3","Name":"Referral Letter","Order":3},
+        {"Id":"bsd-4","Name":"Service Card (Employ ID)","Order":4},
+        {"Id":"bsd-5","Name":"Valid Identity Proof","Order":5},
+        {"Id":"bsd-6","Name":"Others","Order":6}         
+    ]
+}
+
+
+
+

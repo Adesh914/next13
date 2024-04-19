@@ -155,3 +155,6 @@ export const ClaimStatusPayment = db.define('claim_payment', {
     freezeTableName: true,
     timestamps: false
 });
+
+
+// https://www.digitalocean.com/community/tutorials/how-to-back-up-restore-and-migrate-a-mongodb-database-on-ubuntu-20-04
