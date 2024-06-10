@@ -58,19 +58,24 @@ const server = new ApolloServer({
     // graphqlUploadExpress: { maxFileSize: 10000, maxFiles: 10 },
     typeDefs: [itemTable, productTable, adminUserTable, bpaSchema],
     resolvers: [itemResolver, productResolver, adminResolver, bapResolver],
-    // csrfPrevention: false,
-    csrfPrevention: true,
-    dataSources: () => ({}),
+
+
     introspection: true,
     // cors: { origin: "http://localhost:3000/" },
 
     playground: true
 })
 
+const { url } = await startStandaloneServer(server, {
+    // A named context function is required if you are not
+    // using ApolloServer<BaseContext>
+    context: async ({ req, res }) => ({
+        // token: await getTokenForRequest(req),
 
-export default startServerAndCreateNextHandler(server, {
-    context: async (req, res) => ({ req, res, user: true }),
+    }),
+    listen: { port: 4000 },
 });
+
 
 // https://github.com/apollo-server-integrations/apollo-server-integration-next
 //https://graphql.org/graphql-js/mutations-and-input-types/
