@@ -1,5 +1,6 @@
 import { ApolloServer } from '@apollo/server';
 import { ApolloGateway } from "@apollo/gateway";
+import { startStandaloneServer } from '@apollo/server/standalone';
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
 // import {graphqlUploadExpress } 
 
@@ -10,12 +11,14 @@ import productTable from "../../db/Schema/productSchema.js";
 import adminUserTable from "../../db/Schema/adminSchema";
 // import uploadSchema from "../../db/Schema/uploadSchema";
 import bpaSchema from "../../db/Schema/bpaSchema";
+import dashboardSchema from "../../db/Schema/dashboardSchema";
 //import typeDefs from '../../db/Schema/schema-xx';
 import itemResolver from "@/db/Resolvers/itemResolvers";
 import productResolver from "../../db/Resolvers/productResolvers";
 import adminResolver from "../../db/Resolvers/adminResolvers";
 // import uploadResolver from "../../db/Resolvers/uploadResolvers";
 import bapResolver from '@/db/Resolvers/bpaResolver';
+import dashboardResolver from "../../db/Resolvers/dashboardResolver";
 import connectDb from "../../db/config";
 // console.log("RESOLVER:", Product)
 connectDb();
@@ -69,10 +72,10 @@ const server = new ApolloServer({
 const { url } = await startStandaloneServer(server, {
     // A named context function is required if you are not
     // using ApolloServer<BaseContext>
-    context: async ({ req, res }) => ({
-        // token: await getTokenForRequest(req),
+    // context: async ({ req, res }) => ({
+    //     // token: await getTokenForRequest(req),
 
-    }),
+    // }),
     listen: { port: 4000 },
 });
 

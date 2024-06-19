@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const sequencing = require("../counterModel");
+const sequencing = require("../db/models/counterModel");
 const { Schema } = mongoose;
 mongoose.Promise = global.Promise;
 
