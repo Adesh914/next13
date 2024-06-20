@@ -1,4 +1,4 @@
-import claimMst from "../models/sql/claim-model";
+import claimMst from "../../sql/claim-model";
 const dashboardResolver = {
     Query: {
         StatusCounter: async (parent, args) => {

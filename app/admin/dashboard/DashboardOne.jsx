@@ -3,34 +3,117 @@ import { useState, useEffect } from "react";
 import { easepick } from "@easepick/core";
 import { RangePlugin } from "@easepick/range-plugin";
 import { PresetPlugin } from "@easepick/preset-plugin";
+import { AmpPlugin } from "@easepick/amp-plugin";
 import { useQuery, gql } from "@apollo/client";
 import commonData from "../../../sql/common-data.json";
+import counterData from "./StatusCounter.json";
+import { StatusCountChart } from "./Chart";
 // export const DASHBOARD_QUERY = gql``;
 // https://stackoverflow.com/questions/41791015/mongoose-group-and-count
 // https://stackoverflow.com/questions/51019596/how-get-count-from-mongodb-with-different-status-from-one-collection
+
+
 export default function DashboardOne({ params }) {
     const [allStatus, setAllStatus] = useState([]);
+    const [statusCounter, setStatusCounter] = useState();
     useEffect(() => {
         setAllStatus([...commonData.preauth_status, ...commonData.claim_status]);
-    }, []);
+        console.log("counterData", counterData)
+        setStatusCounter(counterData.data.StatusCounter)
+    }, [statusCounter]);
     useEffect(() => {
         const picker = new easepick.create({
             element: document.getElementById('datepickerRange'),
             css: [
                 'https://cdn.jsdelivr.net/npm/@easepick/core@1.2.1/dist/index.css',
                 'https://cdn.jsdelivr.net/npm/@easepick/range-plugin@1.2.1/dist/index.css',
-                'https://cdn.jsdelivr.net/npm/@easepick/preset-plugin@1.2.1/dist/index.css'
+                'https://cdn.jsdelivr.net/npm/@easepick/preset-plugin@1.2.1/dist/index.css',
+                'https://cdn.jsdelivr.net/npm/@easepick/amp-plugin@1.2.1/dist/index.css'
             ],
-            plugins: [RangePlugin, PresetPlugin],
+            plugins: [RangePlugin, PresetPlugin, AmpPlugin],
+            AmpPlugin: {
+                dropdown: {
+                    months: true,
+                    years: true,
+                    minYear: 1960,
+                    maxYear: (new Date()).getFullYear(),
+                    weekNumbers: true
+                },
+            }
         });
     }, [])
+    const StatusSection = ({ statusData }) => {
+        const [data] = statusData.StatusData;
+        return (
+            <div className="col-lg-6 d-flex border border-gray-300 border-dashed rounded p-2 mb-2">
+                {/*begin::Block*/}
+                <div className="d-flex align-items-center flex-grow-1 me-2 me-sm-5">
+                    {/*begin::Symbol*/}
+                    <div className="symbol symbol-50px me-4">
+                        <span className="symbol-label">
+                            {/*begin::Svg Icon | path: icons/duotune/general/gen013.svg*/}
+                            <span className="svg-icon svg-icon-2qx svg-icon-primary">
+                                <svg
+                                    width={24}
+                                    height={24}
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        opacity="0.3"
+                                        d="M20.9 12.9C20.3 12.9 19.9 12.5 19.9 11.9C19.9 11.3 20.3 10.9 20.9 10.9H21.8C21.3 6.2 17.6 2.4 12.9 2V2.9C12.9 3.5 12.5 3.9 11.9 3.9C11.3 3.9 10.9 3.5 10.9 2.9V2C6.19999 2.5 2.4 6.2 2 10.9H2.89999C3.49999 10.9 3.89999 11.3 3.89999 11.9C3.89999 12.5 3.49999 12.9 2.89999 12.9H2C2.5 17.6 6.19999 21.4 10.9 21.8V20.9C10.9 20.3 11.3 19.9 11.9 19.9C12.5 19.9 12.9 20.3 12.9 20.9V21.8C17.6 21.3 21.4 17.6 21.8 12.9H20.9Z"
+                                        fill="currentColor"
+                                    />
+                                    <path
+                                        d="M16.9 10.9H13.6C13.4 10.6 13.2 10.4 12.9 10.2V5.90002C12.9 5.30002 12.5 4.90002 11.9 4.90002C11.3 4.90002 10.9 5.30002 10.9 5.90002V10.2C10.6 10.4 10.4 10.6 10.2 10.9H9.89999C9.29999 10.9 8.89999 11.3 8.89999 11.9C8.89999 12.5 9.29999 12.9 9.89999 12.9H10.2C10.4 13.2 10.6 13.4 10.9 13.6V13.9C10.9 14.5 11.3 14.9 11.9 14.9C12.5 14.9 12.9 14.5 12.9 13.9V13.6C13.2 13.4 13.4 13.2 13.6 12.9H16.9C17.5 12.9 17.9 12.5 17.9 11.9C17.9 11.3 17.5 10.9 16.9 10.9Z"
+                                        fill="currentColor"
+                                    />
+                                </svg>
+                            </span>
+                            {/*end::Svg Icon*/}
+                        </span>
+                    </div>
+                    {/*end::Symbol*/}
+                    {/*begin::Section*/}
+                    <div className="me-2">
+                        <a
+                            href="#"
+                            className="text-gray-800 text-hover-primary fs-6 fw-bold"
+                        >
+                            {data.Name}
+                        </a>
+                        {/* <span className="text-gray-400 fw-bold d-block fs-7">
+                            Great, you always attending class. keep it up
+                        </span> */}
+                    </div>
+                    {/*end::Section*/}
+                </div>
+                {/*end::Block*/}
+                {/*begin::Info*/}
+                <div className="d-flex align-items-center">
+                    <span className="text-dark fw-bolder fs-2x">{statusData.Count}</span>
+                    {/* <span className="fw-semibold fs-2 text-gray-600 mx-1 pt-1">
+                        /
+                    </span>
+                    <span className="text-gray-600 fw-semibold fs-2 me-3 pt-2">
+                        76
+                    </span>
+                    <span className="badge badge-lg badge-light-success align-self-center px-2">
+                        95%
+                    </span> */}
+                </div>
+                {/*end::Info*/}
+            </div>
+        )
+    }
     return (<>
         <div id="kt_content_container" className="d-flex flex-column-fluid align-items-start  container-xxl ">
 
             <div className="content flex-row-fluid" id="kt_content">
                 <div className="row g-5 g-xl-10 mb-5 mb-xl-10">
                     {/*begin::Col*/}
-                    <div className="col-xxl-8">
+                    <div className="col-xxl-8 col-xxl-12">
                         {/*begin::Chart widget 22*/}
                         <div className="card h-xl-100">
                             {/*begin::Header*/}
@@ -134,283 +217,29 @@ export default function DashboardOne({ params }) {
                                         {/*begin::Wrapper*/}
                                         <div className="d-flex flex-wrap flex-md-nowrap">
                                             {/*begin::Items*/}
-                                            <div className="me-md-5 w-100">
-                                                {/*begin::Item*/}
-                                                <div className="d-flex border border-gray-300 border-dashed rounded p-6 mb-6">
-                                                    {/*begin::Block*/}
-                                                    <div className="d-flex align-items-center flex-grow-1 me-2 me-sm-5">
-                                                        {/*begin::Symbol*/}
-                                                        <div className="symbol symbol-50px me-4">
-                                                            <span className="symbol-label">
-                                                                {/*begin::Svg Icon | path: icons/duotune/general/gen013.svg*/}
-                                                                <span className="svg-icon svg-icon-2qx svg-icon-primary">
-                                                                    <svg
-                                                                        width={24}
-                                                                        height={24}
-                                                                        viewBox="0 0 24 24"
-                                                                        fill="none"
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                    >
-                                                                        <path
-                                                                            opacity="0.3"
-                                                                            d="M20.9 12.9C20.3 12.9 19.9 12.5 19.9 11.9C19.9 11.3 20.3 10.9 20.9 10.9H21.8C21.3 6.2 17.6 2.4 12.9 2V2.9C12.9 3.5 12.5 3.9 11.9 3.9C11.3 3.9 10.9 3.5 10.9 2.9V2C6.19999 2.5 2.4 6.2 2 10.9H2.89999C3.49999 10.9 3.89999 11.3 3.89999 11.9C3.89999 12.5 3.49999 12.9 2.89999 12.9H2C2.5 17.6 6.19999 21.4 10.9 21.8V20.9C10.9 20.3 11.3 19.9 11.9 19.9C12.5 19.9 12.9 20.3 12.9 20.9V21.8C17.6 21.3 21.4 17.6 21.8 12.9H20.9Z"
-                                                                            fill="currentColor"
-                                                                        />
-                                                                        <path
-                                                                            d="M16.9 10.9H13.6C13.4 10.6 13.2 10.4 12.9 10.2V5.90002C12.9 5.30002 12.5 4.90002 11.9 4.90002C11.3 4.90002 10.9 5.30002 10.9 5.90002V10.2C10.6 10.4 10.4 10.6 10.2 10.9H9.89999C9.29999 10.9 8.89999 11.3 8.89999 11.9C8.89999 12.5 9.29999 12.9 9.89999 12.9H10.2C10.4 13.2 10.6 13.4 10.9 13.6V13.9C10.9 14.5 11.3 14.9 11.9 14.9C12.5 14.9 12.9 14.5 12.9 13.9V13.6C13.2 13.4 13.4 13.2 13.6 12.9H16.9C17.5 12.9 17.9 12.5 17.9 11.9C17.9 11.3 17.5 10.9 16.9 10.9Z"
-                                                                            fill="currentColor"
-                                                                        />
-                                                                    </svg>
-                                                                </span>
-                                                                {/*end::Svg Icon*/}
-                                                            </span>
-                                                        </div>
-                                                        {/*end::Symbol*/}
-                                                        {/*begin::Section*/}
-                                                        <div className="me-2">
-                                                            <a
-                                                                href="#"
-                                                                className="text-gray-800 text-hover-primary fs-6 fw-bold"
-                                                            >
-                                                                Attendance
-                                                            </a>
-                                                            <span className="text-gray-400 fw-bold d-block fs-7">
-                                                                Great, you always attending class. keep it up
-                                                            </span>
-                                                        </div>
-                                                        {/*end::Section*/}
-                                                    </div>
-                                                    {/*end::Block*/}
-                                                    {/*begin::Info*/}
-                                                    <div className="d-flex align-items-center">
-                                                        <span className="text-dark fw-bolder fs-2x">73</span>
-                                                        <span className="fw-semibold fs-2 text-gray-600 mx-1 pt-1">
-                                                            /
-                                                        </span>
-                                                        <span className="text-gray-600 fw-semibold fs-2 me-3 pt-2">
-                                                            76
-                                                        </span>
-                                                        <span className="badge badge-lg badge-light-success align-self-center px-2">
-                                                            95%
-                                                        </span>
-                                                    </div>
-                                                    {/*end::Info*/}
-                                                </div>
-                                                {/*end::Item*/}
-                                                {/*begin::Item*/}
-                                                <div className="d-flex border border-gray-300 border-dashed rounded p-6 mb-6">
-                                                    {/*begin::Block*/}
-                                                    <div className="d-flex align-items-center flex-grow-1 me-2 me-sm-5">
-                                                        {/*begin::Symbol*/}
-                                                        <div className="symbol symbol-50px me-4">
-                                                            <span className="symbol-label">
-                                                                {/*begin::Svg Icon | path: icons/duotune/general/gen025.svg*/}
-                                                                <span className="svg-icon svg-icon-2qx svg-icon-primary">
-                                                                    <svg
-                                                                        width={24}
-                                                                        height={24}
-                                                                        viewBox="0 0 24 24"
-                                                                        fill="none"
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                    >
-                                                                        <rect
-                                                                            x={2}
-                                                                            y={2}
-                                                                            width={9}
-                                                                            height={9}
-                                                                            rx={2}
-                                                                            fill="currentColor"
-                                                                        />
-                                                                        <rect
-                                                                            opacity="0.3"
-                                                                            x={13}
-                                                                            y={2}
-                                                                            width={9}
-                                                                            height={9}
-                                                                            rx={2}
-                                                                            fill="currentColor"
-                                                                        />
-                                                                        <rect
-                                                                            opacity="0.3"
-                                                                            x={13}
-                                                                            y={13}
-                                                                            width={9}
-                                                                            height={9}
-                                                                            rx={2}
-                                                                            fill="currentColor"
-                                                                        />
-                                                                        <rect
-                                                                            opacity="0.3"
-                                                                            x={2}
-                                                                            y={13}
-                                                                            width={9}
-                                                                            height={9}
-                                                                            rx={2}
-                                                                            fill="currentColor"
-                                                                        />
-                                                                    </svg>
-                                                                </span>
-                                                                {/*end::Svg Icon*/}
-                                                            </span>
-                                                        </div>
-                                                        {/*end::Symbol*/}
-                                                        {/*begin::Section*/}
-                                                        <div className="me-2">
-                                                            <a
-                                                                href="#"
-                                                                className="text-gray-800 text-hover-primary fs-6 fw-bold"
-                                                            >
-                                                                Homeworks
-                                                            </a>
-                                                            <span className="text-gray-400 fw-bold d-block fs-7">
-                                                                Don’t forget to turn in your task
-                                                            </span>
-                                                        </div>
-                                                        {/*end::Section*/}
-                                                    </div>
-                                                    {/*end::Block*/}
-                                                    {/*begin::Info*/}
-                                                    <div className="d-flex align-items-center">
-                                                        <span className="text-dark fw-bolder fs-2x">207</span>
-                                                        <span className="fw-semibold fs-2 text-gray-600 mx-1 pt-1">
-                                                            /
-                                                        </span>
-                                                        <span className="text-gray-600 fw-semibold fs-2 me-3 pt-2">
-                                                            214
-                                                        </span>
-                                                        <span className="badge badge-lg badge-light-success align-self-center px-2">
-                                                            92%
-                                                        </span>
-                                                    </div>
-                                                    {/*end::Info*/}
-                                                </div>
-                                                {/*end::Item*/}
-                                                {/*begin::Item*/}
-                                                <div className="d-flex border border-gray-300 border-dashed rounded p-6 mb-6">
-                                                    {/*begin::Block*/}
-                                                    <div className="d-flex align-items-center flex-grow-1 me-2 me-sm-5">
-                                                        {/*begin::Symbol*/}
-                                                        <div className="symbol symbol-50px me-4">
-                                                            <span className="symbol-label">
-                                                                {/*begin::Svg Icon | path: icons/duotune/abstract/abs025.svg*/}
-                                                                <span className="svg-icon svg-icon-2qx svg-icon-primary">
-                                                                    <svg
-                                                                        width={24}
-                                                                        height={24}
-                                                                        viewBox="0 0 24 24"
-                                                                        fill="none"
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                    >
-                                                                        <path
-                                                                            d="M16.925 3.90078V8.00077L12.025 10.8008V5.10078L15.525 3.10078C16.125 2.80078 16.925 3.20078 16.925 3.90078ZM2.525 13.5008L6.025 15.5008L10.925 12.7008L6.025 9.90078L2.525 11.9008C1.825 12.3008 1.825 13.2008 2.525 13.5008ZM18.025 19.7008V15.6008L13.125 12.8008V18.5008L16.625 20.5008C17.225 20.8008 18.025 20.4008 18.025 19.7008Z"
-                                                                            fill="currentColor"
-                                                                        />
-                                                                        <path
-                                                                            opacity="0.3"
-                                                                            d="M8.52499 3.10078L12.025 5.10078V10.8008L7.125 8.00077V3.90078C7.125 3.20078 7.92499 2.80078 8.52499 3.10078ZM7.42499 20.5008L10.925 18.5008V12.8008L6.02499 15.6008V19.7008C6.02499 20.4008 6.82499 20.8008 7.42499 20.5008ZM21.525 11.9008L18.025 9.90078L13.125 12.7008L18.025 15.5008L21.525 13.5008C22.225 13.2008 22.225 12.3008 21.525 11.9008Z"
-                                                                            fill="currentColor"
-                                                                        />
-                                                                    </svg>
-                                                                </span>
-                                                                {/*end::Svg Icon*/}
-                                                            </span>
-                                                        </div>
-                                                        {/*end::Symbol*/}
-                                                        {/*begin::Section*/}
-                                                        <div className="me-2">
-                                                            <a
-                                                                href="#"
-                                                                className="text-gray-800 text-hover-primary fs-6 fw-bold"
-                                                            >
-                                                                Tests
-                                                            </a>
-                                                            <span className="text-gray-400 fw-bold d-block fs-7">
-                                                                You take 12 subjects at this semester
-                                                            </span>
-                                                        </div>
-                                                        {/*end::Section*/}
-                                                    </div>
-                                                    {/*end::Block*/}
-                                                    {/*begin::Info*/}
-                                                    <div className="d-flex align-items-center">
-                                                        <span className="text-dark fw-bolder fs-2x">27</span>
-                                                        <span className="fw-semibold fs-2 text-gray-600 mx-1 pt-1">
-                                                            /
-                                                        </span>
-                                                        <span className="text-gray-600 fw-semibold fs-2 me-3 pt-2">
-                                                            38
-                                                        </span>
-                                                        <span className="badge badge-lg badge-light-warning align-self-center px-2">
-                                                            80%
-                                                        </span>
-                                                    </div>
-                                                    {/*end::Info*/}
-                                                </div>
-                                                {/*end::Item*/}
+                                            <div className="row me-md-5 w-50">
+                                                {statusCounter?.map((row, i) => {
+                                                    return <StatusSection statusData={row} key={i} />
+                                                })}
+
                                             </div>
                                             {/*end::Items*/}
                                             {/*begin::Container*/}
                                             <div className="d-flex justify-content-between flex-column w-225px w-md-600px mx-auto mx-md-0 pt-3 pb-10">
                                                 {/*begin::Title*/}
-                                                <div className="fs-4 fw-bold text-gray-900 text-center mb-5">
+                                                {/*  <div className="fs-4 fw-bold text-gray-900 text-center mb-5">
                                                     Session Attendance <br />
                                                     for Current Academic Year
-                                                </div>
+                                                </div> */}
                                                 {/*end::Title*/}
                                                 {/*begin::Chart*/}
-                                                <div
+                                                {/* <div
                                                     id="kt_chart_widgets_22_chart_1"
                                                     className="mx-auto mb-4"
-                                                />
+                                                /> */}
+                                                <StatusCountChart dataset={statusCounter} />
                                                 {/*end::Chart*/}
-                                                {/*begin::Labels*/}
-                                                <div className="mx-auto">
-                                                    {/*begin::Label*/}
-                                                    <div className="d-flex align-items-center mb-2">
-                                                        {/*begin::Bullet*/}
-                                                        <div className="bullet bullet-dot w-8px h-7px bg-success me-2" />
-                                                        {/*end::Bullet*/}
-                                                        {/*begin::Label*/}
-                                                        <div className="fs-8 fw-semibold text-muted">
-                                                            Precent(133)
-                                                        </div>
-                                                        {/*end::Label*/}
-                                                    </div>
-                                                    {/*end::Label*/}
-                                                    {/*begin::Label*/}
-                                                    <div className="d-flex align-items-center mb-2">
-                                                        {/*begin::Bullet*/}
-                                                        <div className="bullet bullet-dot w-8px h-7px bg-primary me-2" />
-                                                        {/*end::Bullet*/}
-                                                        {/*begin::Label*/}
-                                                        <div className="fs-8 fw-semibold text-muted">
-                                                            Illness(9)
-                                                        </div>
-                                                        {/*end::Label*/}
-                                                    </div>
-                                                    {/*end::Label*/}
-                                                    {/*begin::Label*/}
-                                                    <div className="d-flex align-items-center mb-2">
-                                                        {/*begin::Bullet*/}
-                                                        <div className="bullet bullet-dot w-8px h-7px bg-info me-2" />
-                                                        {/*end::Bullet*/}
-                                                        {/*begin::Label*/}
-                                                        <div className="fs-8 fw-semibold text-muted">Late(2)</div>
-                                                        {/*end::Label*/}
-                                                    </div>
-                                                    {/*end::Label*/}
-                                                    {/*begin::Label*/}
-                                                    <div className="d-flex align-items-center mb-2">
-                                                        {/*begin::Bullet*/}
-                                                        <div className="bullet bullet-dot w-8px h-7px bg-danger me-2" />
-                                                        {/*end::Bullet*/}
-                                                        {/*begin::Label*/}
-                                                        <div className="fs-8 fw-semibold text-muted">Absent(3)</div>
-                                                        {/*end::Label*/}
-                                                    </div>
-                                                    {/*end::Label*/}
-                                                </div>
-                                                {/*end::Labels*/}
+
                                             </div>
                                             {/*end::Container*/}
                                         </div>

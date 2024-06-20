@@ -37,6 +37,7 @@
     "formik": "^2.4.1",
     "graphql": "^16.7.1",
     "graphql-tag": "^2.12.6",
+    "highcharts": "^11.4.3",
     "html-to-pdfmake": "^2.5.1",
     "imap": "^0.8.19",
     "imap-simple": "^5.1.0",
