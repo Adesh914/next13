@@ -69,3 +69,28 @@ const ALL_ADMIN = `
         }
     }
     `;
+
+
+const DASH = gql`
+query StatusCounter {
+  StatusCounter {
+    Count
+    StatusData {
+      Id
+      Name
+    }  
+  }
+  claimDrilldown {
+    Bpa {
+      CaseCount
+      Count
+      Name
+    }
+    Hospital {
+      CaseCount
+      Count
+      Name
+    }
+  }
+}
+    `;

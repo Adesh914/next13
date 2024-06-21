@@ -1,12 +1,21 @@
-import React, { useEffect } from 'react';
+"use client";
+import React, { useState, useEffect } from 'react';
+
 import Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
+import drilldow from "highcharts/modules/drilldown";
+
+import HighchartsExporting from "highcharts/modules/exporting";
+drilldow(Highcharts);
+HighchartsExporting(Highcharts);
+
 
 export const StatusCountChart = ({ dataset }) => {
-    // const Dataset = dataset?.map(row => {
-    //     return { name: row.StatusData[0].Name, y: row.Count }
-    // })
+    const Dataset = dataset?.map(row => {
+        return { name: row.StatusData[0].Name, y: row.Count }
+    })
 
-    // console.log("Dataset", Dataset)
+    console.log("Dataset", Dataset)
     useEffect(() => {
         (function (H) {
             H.seriesTypes.pie.prototype.animate = function (init) {
@@ -21,8 +30,8 @@ export const StatusCountChart = ({ dataset }) => {
                     } = series;
 
                 function fanAnimate(point, startAngleRad) {
-                    const graphic = point.graphic,
-                        args = point.shapeArgs;
+                    const graphic = point?.graphic,
+                        args = point?.shapeArgs;
 
                     if (graphic && args) {
 
@@ -143,7 +152,55 @@ export const StatusCountChart = ({ dataset }) => {
             }]
         });
 
-    }, []);
+    }, [dataset]);
 
     return (<div id="container" />)
+}
+
+export const HospitalBpaDrilldown = () => {
+    //https://codesandbox.io/s/highcharts-react-demo-tq52i?file=/demo.jsx:1015-1077
+    const options = {
+        chart: {
+            type: "column",
+            events: {
+                click: function (e) {
+                    console.log("test");
+                },
+                dropdown: function (e) {
+                    console.log("test");
+                }
+            }
+        },
+        series: [
+            {
+                data: [
+                    {
+                        drilldown: "DataA",
+                        y: 100
+                    },
+                    {
+                        drilldown: "DataB",
+                        y: 50
+                    }
+                ]
+            }
+        ],
+        drilldown: {
+            series: [
+                {
+                    id: "DataA",
+                    data: [["A", 0.1], ["B", 1.3]]
+                },
+
+                {
+                    id: "DataB",
+                    data: [["C", 6.2], ["D", 0.29]]
+                }
+            ]
+        }
+    };
+
+    return (
+        <HighchartsReact highcharts={Highcharts} options={options} />
+    );
 }
