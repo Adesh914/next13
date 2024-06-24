@@ -95,6 +95,9 @@ export const StatusCountChart = ({ dataset }) => {
             chart: {
                 type: 'pie'
             },
+            credits: {
+                enabled: false
+            },
             title: {
                 text: 'Departamental Strength of the Company',
                 align: 'left'
@@ -155,6 +158,7 @@ export const StatusCountChart = ({ dataset }) => {
     }, [dataset]);
 
     return (<div id="container" />)
+
 }
 
 export const HospitalBpaDrilldown = () => {
@@ -162,6 +166,7 @@ export const HospitalBpaDrilldown = () => {
     const options = {
         chart: {
             type: "column",
+            height: 600,//(3 / 4 * 100) + '%',
             events: {
                 click: function (e) {
                     console.log("test");
@@ -171,8 +176,12 @@ export const HospitalBpaDrilldown = () => {
                 }
             }
         },
+        credits: {
+            enabled: false
+        },
         series: [
             {
+                name: 'Medals',
                 data: [
                     {
                         drilldown: "DataA",
@@ -186,13 +195,16 @@ export const HospitalBpaDrilldown = () => {
             }
         ],
         drilldown: {
+
             series: [
                 {
+                    name: 'Medals drilldown 1',
                     id: "DataA",
                     data: [["A", 0.1], ["B", 1.3]]
                 },
 
                 {
+                    name: 'Medals drilldown 2',
                     id: "DataB",
                     data: [["C", 6.2], ["D", 0.29]]
                 }
@@ -203,4 +215,71 @@ export const HospitalBpaDrilldown = () => {
     return (
         <HighchartsReact highcharts={Highcharts} options={options} />
     );
+}
+export const SemiCircleDonut = () => {
+    const options = {
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: 0,
+            plotShadow: false,
+            height: 100,
+
+        },
+        credits: {
+            enabled: false
+        },
+        title: false,
+        // title: {
+        //     text: 'H',
+        //     align: 'center',
+        //     verticalAlign: 'middle',
+        //     y: 10,
+        //     style: {
+        //         fontSize: '1.1em'
+        //     }
+        // },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        accessibility: {
+            point: {
+                valueSuffix: '%'
+            }
+        },
+        plotOptions: {
+            series: {
+                pointPadding: 0,
+                groupPadding: 0,
+                borderWidth: 0,
+            },
+            pie: {
+                dataLabels: {
+                    enabled: true,
+                    distance: -50,
+                    style: {
+                        fontWeight: 'bold',
+                        color: 'white',
+                    }
+                },
+                startAngle: -90,
+                endAngle: 90,
+                center: ['50%', '75%'],
+                size: '100%'
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Browser share',
+            innerSize: '70%',
+            data: [
+                ['Chrome', 73.86],
+                ['Edge', 11.97],
+                ['Firefox', 5.52],
+                ['Safari', 2.98],
+                ['Internet Explorer', 1.90],
+                ['Other', 3.77]
+            ]
+        }]
+    }
+    return (<HighchartsReact highcharts={Highcharts} options={options} />)
 }
