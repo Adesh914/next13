@@ -283,3 +283,67 @@ export const SemiCircleDonut = () => {
     }
     return (<HighchartsReact highcharts={Highcharts} options={options} />)
 }
+
+export const BpaStatusChart = ({ category, plotSeries }) => {
+    console.log("plotdata", plotSeries)
+    const optConfig = {
+        chart: {
+            type: 'column',
+            options3d: {
+                enabled: true,
+                alpha: 15,
+                beta: 15,
+                viewDistance: 25,
+                depth: 30
+            },
+            height: 600
+        },
+        credits: false,
+        title: {
+            text: ' Electricity production in countries, grouped by continent',
+            align: 'left'
+        },
+
+        xAxis: {
+            categories: category,
+            labels: {
+                skew3d: true,
+                style: {
+                    fontSize: '16px'
+                }
+            }
+        },
+
+        yAxis: {
+            allowDecimals: false,
+            min: 0,
+            title: {
+                text: 'TWh',
+                skew3d: true,
+                style: {
+                    fontSize: '16px'
+                }
+            }
+        },
+
+        tooltip: {
+            headerFormat: '<b>{point.key}</b><br>',
+            pointFormat: '<span style="color:{series.color}">\u25CF</span> ' +
+                '{series.name}: {point.y} / {point.stackTotal}'
+        },
+
+        plotOptions: {
+            // series: {
+            //     pointStart: false
+            // },
+            column: {
+                stacking: 'normal',
+                depth: 30
+            }
+        },
+
+        series: plotSeries
+
+    }
+    return (<HighchartsReact highcharts={Highcharts} options={optConfig} />);
+}

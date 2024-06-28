@@ -27,9 +27,22 @@ type bpa_type{
     Count:Int
     CaseCount:Int
 }
+type casestatus_bpa{
+    Bpa: String
+    Status: String
+    Count: Int
+}
+type status_type{
+    bpa_list:[status_cnt]
+}
+type status_cnt{
+    status: String
+    count:Int
+}
     type Query{
-        StatusCounter:[ClaimStatusCount]
+        StatusCounter(userId:ID):[ClaimStatusCount]
         claimDrilldown:[ClaimMst]
+        userBpaStatus(userId:ID):[casestatus_bpa]
     }
 `;
 module.exports = typeDefs;
