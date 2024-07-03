@@ -44,7 +44,7 @@ const dashboardResolver = {
 
         Hospital: async (parent, { }, context, info) => {
             const HospitalDataset = await hospital_list();
-            console.log(HospitalDataset)
+            // console.log(HospitalDataset)
         }
     },
     // casestatus_bpa: {
@@ -75,9 +75,9 @@ const dashboardResolver = {
     Query: {
         StatusCounter: async (parent, args) => {
             const { userId } = args;
-            let IsUser = userId ? `${{ $match: { Hospital: userId } }}` : ``
+
             const data = await claimMst.aggregate([
-                { $match: { Hospital: userId } },
+                { $match: userId ? { Hospital: userId } : {} },
                 {
                     $group: {
                         _id: { LastStatus: "$LastStatus" },
@@ -89,6 +89,7 @@ const dashboardResolver = {
             return data;
         },
         claimDrilldown: async (_, args) => {
+
             const data = await claimMst.aggregate([
                 {
                     $group: {
