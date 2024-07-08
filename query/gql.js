@@ -1,4 +1,5 @@
 // import {gql} from 
+// https://jsfiddle.net/BlackLabel/e7yuga5d/
 const a = `query Products{
     getProducts {
       id
